@@ -5,15 +5,23 @@ import CategoriesSection from "@/components/home/CategoriesSection";
 import BestSellers from "@/components/home/BestSellers";
 import Differentials from "@/components/home/Differentials";
 import Newsletter from "@/components/home/Newsletter";
+import { getFeaturedProducts, getBestSellers } from "@/lib/catalog";
 
-export default function HomePage() {
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const [featured, bestSellers] = await Promise.all([
+    getFeaturedProducts(),
+    getBestSellers(),
+  ]);
+
   return (
     <>
       <Hero />
-      <FeaturedProducts />
+      <FeaturedProducts products={featured} />
       <PromoBanners />
       <CategoriesSection />
-      <BestSellers />
+      <BestSellers products={bestSellers} />
       <Differentials />
       <Newsletter />
     </>

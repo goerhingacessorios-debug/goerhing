@@ -4,9 +4,9 @@ import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "@/components/product/ProductCard";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { bestSellers } from "@/lib/data";
+import type { Product } from "@/lib/types";
 
-export default function BestSellers() {
+export default function BestSellers({ products }: { products: Product[] }) {
   const scroller = useRef<HTMLDivElement>(null);
 
   function scroll(dir: "left" | "right") {
@@ -48,7 +48,7 @@ export default function BestSellers() {
         ref={scroller}
         className="hide-scrollbar flex snap-x gap-4 overflow-x-auto pb-2 sm:gap-5"
       >
-        {bestSellers.map((product) => (
+        {products.map((product) => (
           <div
             key={product.id}
             className="w-[70%] shrink-0 snap-start sm:w-[45%] lg:w-[23.5%]"

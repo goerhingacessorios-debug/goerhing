@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import ProductListing from "@/components/product/ProductListing";
+import { getAllProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Produtos",
@@ -8,7 +9,10 @@ export const metadata: Metadata = {
     "Explore eletrônicos premium: smartphones, notebooks, tablets, áudio, smartwatches, games e acessórios.",
 };
 
-export default function ProdutosPage() {
+export const revalidate = 60;
+
+export default async function ProdutosPage() {
+  const products = await getAllProducts();
   return (
     <Suspense
       fallback={
@@ -17,7 +21,7 @@ export default function ProdutosPage() {
         </div>
       }
     >
-      <ProductListing />
+      <ProductListing initialProducts={products} />
     </Suspense>
   );
 }

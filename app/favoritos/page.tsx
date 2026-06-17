@@ -1,14 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
-import { products } from "@/lib/data";
+import { getAllProducts } from "@/lib/catalog";
+import type { Product } from "@/lib/types";
 import ProductCard from "@/components/product/ProductCard";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 
 export default function FavoritosPage() {
   const { favorites } = useStore();
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    getAllProducts().then(setProducts);
+  }, []);
+
   const list = products.filter((p) => favorites.includes(p.id));
 
   return (

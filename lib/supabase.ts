@@ -1,26 +1,18 @@
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+/** true quando as variáveis de ambiente do Supabase estão definidas. */
+export const supabaseConfigured = Boolean(url && anonKey);
+
 /**
- * Integração futura com Supabase.
- *
- * 1. Instale o client:  npm install @supabase/supabase-js
- * 2. Configure as variáveis em .env.local (veja .env.example)
- * 3. Descomente o bloco abaixo.
- *
- * Estrutura de tabelas sugerida:
- *  - products    (id, slug, name, category_id, price, old_price, rating, reviews, images[], description, specs jsonb, badge, stock, featured, best_seller)
- *  - categories  (id, slug, name, icon, description)
- *  - banners     (id, title, subtitle, image, cta, href, active, order)
- *  - orders      (id, customer_id, items jsonb, total, status, created_at)
- *  - customers   (id, name, email, phone, created_at)
+ * Cliente do Supabase. É `null` quando as variáveis não estão configuradas —
+ * nesse caso o site usa os produtos de exemplo (mock) como fallback.
  */
+export const supabase: SupabaseClient | null = supabaseConfigured
+  ? createClient(url as string, anonKey as string)
+  : null;
 
-// import { createClient } from "@supabase/supabase-js";
-//
-// const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-// const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-//
-// export const supabase = createClient(url, anonKey);
-
-export const supabaseReady = Boolean(
-  process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-);
+/** Nome do bucket de Storage onde ficam as fotos dos produtos. */
+export const PRODUCT_BUCKET = "product-images";

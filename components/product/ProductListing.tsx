@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X, LayoutGrid } from "lucide-react";
 import { motion } from "framer-motion";
-import { products } from "@/lib/data";
+import type { Product } from "@/lib/types";
 import ProductCard from "@/components/product/ProductCard";
 import ProductFilters, { type Filters } from "@/components/product/ProductFilters";
 import Breadcrumb from "@/components/ui/Breadcrumb";
@@ -20,7 +20,11 @@ const SORTS = [
   { value: "name", label: "Nome (A-Z)" },
 ];
 
-export default function ProductListing() {
+export default function ProductListing({
+  initialProducts,
+}: {
+  initialProducts: Product[];
+}) {
   const params = useSearchParams();
   const promo = params.get("promo") === "true";
 
@@ -35,7 +39,7 @@ export default function ProductListing() {
   const [mobileFilters, setMobileFilters] = useState(false);
 
   const filtered = useMemo(() => {
-    let list = products.filter((p) => {
+    let list = initialProducts.filter((p) => {
       if (filters.category && p.categorySlug !== filters.category) return false;
       if (p.price > filters.maxPrice) return false;
       if (filters.minRating && p.rating < filters.minRating) return false;
@@ -65,7 +69,7 @@ export default function ProductListing() {
       }
     });
     return list;
-  }, [filters, sort, promo]);
+  }, [filters, sort, promo, initialProducts]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const current = Math.min(page, totalPages);

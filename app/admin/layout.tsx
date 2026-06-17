@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import AdminShell from "@/components/admin/AdminShell";
+import AdminGate from "@/components/admin/AdminGate";
 
 export const metadata: Metadata = {
   title: "Painel Administrativo",
@@ -11,5 +12,9 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AdminShell>{children}</AdminShell>;
+  return (
+    <AdminGate>
+      <AdminShell>{children}</AdminShell>
+    </AdminGate>
+  );
 }

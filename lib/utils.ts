@@ -14,6 +14,15 @@ export function discountPercent(price: number, oldPrice?: number): number | null
   return Math.round(((oldPrice - price) / oldPrice) * 100);
 }
 
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export function installment(value: number, parts = 12): string {
   const each = value / parts;
   return `${parts}x de ${each.toLocaleString("pt-BR", {
