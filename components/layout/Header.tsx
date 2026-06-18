@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  LogOut,
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { useStore } from "@/context/StoreContext";
@@ -29,10 +30,12 @@ const NAV = [
 ];
 
 export default function Header() {
-  const { cartCount, favoritesCount, setCartOpen } = useStore();
+  const { cartCount, favoritesCount, setCartOpen, user, signOut } = useStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [catOpen, setCatOpen] = useState(false);
+  const [mobileCatOpen, setMobileCatOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>(fallbackCategories);
   const router = useRouter();
   const pathname = usePathname();
@@ -102,13 +105,45 @@ export default function Header() {
 
           {/* Actions */}
           <div className="ml-auto flex items-center gap-1 md:ml-4 md:gap-2">
-            <Link
-              href="/login"
-              className="hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-brand-black transition-colors hover:bg-neutral-100 sm:flex"
-            >
-              <User size={20} />
-              <span className="hidden lg:inline">Entrar</span>
-            </Link>
+            {user ? (
+              <div
+                className="relative hidden sm:block"
+                onMouseEnter={() => setAccountOpen(true)}
+                onMouseLeave={() => setAccountOpen(false)}
+              >
+                <button className="flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-brand-black transition-colors hover:bg-neutral-100">
+                  <User size={20} />
+                  <span className="hidden max-w-[110px] truncate lg:inline">
+                    {(user.user_metadata?.name as string)?.split(" ")[0] ||
+                      "Minha conta"}
+                  </span>
+                </button>
+                {accountOpen && (
+                  <div className="absolute right-0 top-full z-50 w-44 rounded-xl border border-neutral-100 bg-white p-1.5 shadow-premium">
+                    <Link
+                      href="/favoritos"
+                      className="block rounded-lg px-3 py-2 text-sm hover:bg-neutral-50"
+                    >
+                      Meus favoritos
+                    </Link>
+                    <button
+                      onClick={() => signOut()}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50"
+                    >
+                      <LogOut size={15} /> Sair
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-brand-black transition-colors hover:bg-neutral-100 sm:flex"
+              >
+                <User size={20} />
+                <span className="hidden lg:inline">Entrar</span>
+              </Link>
+            )}
             <Link
               href="/favoritos"
               className="relative flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-neutral-100"
@@ -216,23 +251,66 @@ export default function Header() {
               </div>
             </form>
             <div className="flex flex-col gap-1">
-              {NAV.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="rounded-lg px-3 py-3 text-sm font-medium text-brand-graphite hover:bg-neutral-50"
+              {NAV.map((item) =>
+                item.dropdown ? (
+                  <div key={item.label}>
+                    <button
+                      onClick={() => setMobileCatOpen((o) => !o)}
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-sm font-medium text-brand-graphite hover:bg-neutral-50"
+                    >
+                      {item.label}
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform ${
+                          mobileCatOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    {mobileCatOpen && (
+                      <div className="ml-3 flex flex-col border-l border-neutral-100 pl-3">
+                        {categories.map((c) => (
+                          <Link
+                            key={c.slug}
+                            href={`/produtos?categoria=${c.slug}`}
+                            onClick={() => setMobileOpen(false)}
+                            className="rounded-lg px-3 py-2.5 text-sm text-brand-graphite hover:bg-neutral-50"
+                          >
+                            {c.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="rounded-lg px-3 py-3 text-sm font-medium text-brand-graphite hover:bg-neutral-50"
+                  >
+                    {item.label}
+                  </Link>
+                ),
+              )}
+              {user ? (
+                <button
+                  onClick={() => {
+                    signOut();
+                    setMobileOpen(false);
+                  }}
+                  className="mt-3 btn-outline"
                 >
-                  {item.label}
+                  <LogOut size={18} /> Sair ({(user.user_metadata?.name as string)?.split(" ")[0] || "conta"})
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="mt-3 btn-dark"
+                >
+                  <User size={18} /> Entrar / Cadastrar
                 </Link>
-              ))}
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className="mt-3 btn-dark"
-              >
-                <User size={18} /> Entrar / Cadastrar
-              </Link>
+              )}
             </div>
           </div>
         </div>

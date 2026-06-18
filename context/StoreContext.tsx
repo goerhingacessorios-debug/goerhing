@@ -5,10 +5,13 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import type { User } from "@supabase/supabase-js";
 import type { CartItem, Product } from "@/lib/types";
+import { supabase } from "@/lib/supabase";
 
 interface StoreContextValue {
   cart: CartItem[];
@@ -24,16 +27,32 @@ interface StoreContextValue {
   isFavorite: (productId: string) => boolean;
   isCartOpen: boolean;
   setCartOpen: (open: boolean) => void;
+  user: User | null;
+  signOut: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextValue | null>(null);
+
+/** Combina dois carrinhos somando as quantidades de produtos iguais. */
+function mergeCarts(a: CartItem[], b: CartItem[]): CartItem[] {
+  const map = new Map<string, CartItem>();
+  for (const item of [...a, ...b]) {
+    const existing = map.get(item.product.id);
+    if (existing) existing.quantity += item.quantity;
+    else map.set(item.product.id, { ...item });
+  }
+  return Array.from(map.values());
+}
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [isCartOpen, setCartOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const loadingRemote = useRef(false);
 
+  // Hidrata carrinho/favoritos do localStorage
   useEffect(() => {
     try {
       const c = localStorage.getItem("goerhing-cart");
@@ -54,6 +73,67 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (hydrated)
       localStorage.setItem("goerhing-favorites", JSON.stringify(favorites));
   }, [favorites, hydrated]);
+
+  // Sessão do Supabase + carregamento do carrinho do cliente
+  useEffect(() => {
+    if (!supabase) return;
+    let active = true;
+
+    async function loadUserCart(u: User) {
+      if (!supabase) return;
+      loadingRemote.current = true;
+      const { data } = await supabase
+        .from("carts")
+        .select("items")
+        .eq("user_id", u.id)
+        .maybeSingle();
+      const remote: CartItem[] = Array.isArray(data?.items) ? data!.items : [];
+      setCart((local) => {
+        const merged = mergeCarts(local, remote);
+        // salva o carrinho mesclado de volta
+        supabase!
+          .from("carts")
+          .upsert({ user_id: u.id, items: merged, updated_at: new Date().toISOString() })
+          .then(() => {});
+        return merged;
+      });
+      loadingRemote.current = false;
+    }
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!active) return;
+      const u = data.session?.user ?? null;
+      setUser(u);
+      if (u) loadUserCart(u);
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) loadUserCart(u);
+    });
+
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  // Sincroniza alterações do carrinho com o Supabase (cliente logado)
+  useEffect(() => {
+    if (!supabase || !user || !hydrated || loadingRemote.current) return;
+    const t = setTimeout(() => {
+      supabase!
+        .from("carts")
+        .upsert({
+          user_id: user.id,
+          items: cart,
+          updated_at: new Date().toISOString(),
+        })
+        .then(() => {});
+    }, 600);
+    return () => clearTimeout(t);
+  }, [cart, user, hydrated]);
 
   function addToCart(product: Product, quantity = 1) {
     setCart((prev) => {
@@ -77,9 +157,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   function updateQuantity(productId: string, quantity: number) {
     if (quantity < 1) return removeFromCart(productId);
     setCart((prev) =>
-      prev.map((i) =>
-        i.product.id === productId ? { ...i, quantity } : i,
-      ),
+      prev.map((i) => (i.product.id === productId ? { ...i, quantity } : i)),
     );
   }
 
@@ -93,6 +171,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ? prev.filter((id) => id !== productId)
         : [...prev, productId],
     );
+  }
+
+  async function signOut() {
+    if (supabase) await supabase.auth.signOut();
+    setUser(null);
   }
 
   const value = useMemo<StoreContextValue>(() => {
@@ -115,8 +198,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       isFavorite: (id: string) => favorites.includes(id),
       isCartOpen,
       setCartOpen,
+      user,
+      signOut,
     };
-  }, [cart, favorites, isCartOpen]);
+  }, [cart, favorites, isCartOpen, user]);
 
   return (
     <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

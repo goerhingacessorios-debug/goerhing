@@ -14,17 +14,31 @@ export default function AdminGate({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  async function checkAdmin(s: Session | null) {
+    setSession(s);
+    if (!s || !supabase) {
+      setIsAdmin(false);
+      return;
+    }
+    // Verifica via função is_admin() no Supabase. Se a função ainda não existe
+    // (segurança não instalada), libera para não travar o setup inicial.
+    const { data, error } = await supabase.rpc("is_admin");
+    setIsAdmin(error ? true : Boolean(data));
+  }
+
   useEffect(() => {
     if (!supabase) {
       setLoading(false);
       return;
     }
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+    supabase.auth.getSession().then(async ({ data }) => {
+      await checkAdmin(data.session);
       setLoading(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      setSession(s);
+      checkAdmin(s);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
@@ -108,6 +122,22 @@ export default function AdminGate({ children }: { children: React.ReactNode }) {
             {submitting ? "Entrando..." : "Entrar"}
           </button>
         </form>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-neutral-100 px-4 text-center">
+        <AlertTriangle size={40} className="text-amber-500" />
+        <h1 className="text-lg font-bold">Acesso restrito</h1>
+        <p className="max-w-sm text-sm text-neutral-500">
+          Sua conta não tem permissão de administrador. Apenas administradores
+          podem acessar este painel.
+        </p>
+        <button onClick={() => supabase?.auth.signOut()} className="btn-outline">
+          <LogOut size={15} /> Sair
+        </button>
       </div>
     );
   }
