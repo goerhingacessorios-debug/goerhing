@@ -26,7 +26,7 @@ export default function Footer() {
   return (
     <footer className="bg-brand-black text-neutral-400">
       <div className="container-px grid grid-cols-2 gap-x-4 gap-y-8 py-10 md:grid-cols-4 md:gap-10 md:py-14 lg:grid-cols-5">
-        <div className="order-last col-span-2 mt-4 border-t border-white/10 pt-6 md:order-none md:col-span-1 md:mt-0 md:border-0 md:pt-0 lg:col-span-2">
+        <div className="order-last col-span-2 md:order-none md:col-span-1 lg:col-span-2">
           <Logo light />
           <p className="mt-4 max-w-xs text-sm leading-relaxed">
             Eletrônicos, celulares e acessórios premium.
@@ -51,7 +51,7 @@ export default function Footer() {
         </div>
 
         {COLUMNS.map((col) => (
-          <div key={col.title}>
+          <div key={col.title} className="hidden md:block">
             <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-white md:mb-4 md:text-sm">
               {col.title}
             </h4>
