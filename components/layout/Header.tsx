@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -14,7 +14,9 @@ import {
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import { useStore } from "@/context/StoreContext";
-import { categories } from "@/lib/data";
+import { categories as fallbackCategories } from "@/lib/data";
+import { getAllCategories } from "@/lib/catalog";
+import type { Category } from "@/lib/types";
 
 const NAV = [
   { label: "Início", href: "/" },
@@ -31,8 +33,13 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [catOpen, setCatOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>(fallbackCategories);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    getAllCategories().then(setCategories).catch(() => {});
+  }, []);
 
   function search(e: React.FormEvent) {
     e.preventDefault();

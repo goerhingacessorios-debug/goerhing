@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X, LayoutGrid } from "lucide-react";
 import { motion } from "framer-motion";
-import type { Product } from "@/lib/types";
+import type { Product, Category } from "@/lib/types";
 import ProductCard from "@/components/product/ProductCard";
 import ProductFilters, { type Filters } from "@/components/product/ProductFilters";
 import Breadcrumb from "@/components/ui/Breadcrumb";
@@ -22,8 +22,10 @@ const SORTS = [
 
 export default function ProductListing({
   initialProducts,
+  categories,
 }: {
   initialProducts: Product[];
+  categories: Category[];
 }) {
   const params = useSearchParams();
   const promo = params.get("promo") === "true";
@@ -106,6 +108,7 @@ export default function ProductListing({
             filters={filters}
             setFilters={update}
             priceMax={PRICE_MAX}
+            categories={categories}
           />
         </div>
 
@@ -192,6 +195,7 @@ export default function ProductListing({
               filters={filters}
               setFilters={update}
               priceMax={PRICE_MAX}
+              categories={categories}
             />
           </div>
         </div>

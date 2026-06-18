@@ -12,10 +12,13 @@ import {
   Loader2,
   ImagePlus,
 } from "lucide-react";
-import { categories, products as seedProducts } from "@/lib/data";
-import { getAllProducts, productToRow } from "@/lib/catalog";
+import {
+  categories as fallbackCategories,
+  products as seedProducts,
+} from "@/lib/data";
+import { getAllProducts, getAllCategories, productToRow } from "@/lib/catalog";
 import { supabase, supabaseConfigured, PRODUCT_BUCKET } from "@/lib/supabase";
-import type { Product } from "@/lib/types";
+import type { Product, Category } from "@/lib/types";
 import { formatPrice, slugify } from "@/lib/utils";
 
 type Draft = {
@@ -33,7 +36,7 @@ type Draft = {
 
 const emptyDraft: Draft = {
   name: "",
-  category: categories[0].name,
+  category: fallbackCategories[0].name,
   price: "",
   oldPrice: "",
   stock: "",
@@ -45,6 +48,7 @@ const emptyDraft: Draft = {
 
 export default function ProductsManager() {
   const [items, setItems] = useState<Product[]>([]);
+  const [catList, setCatList] = useState<Category[]>(fallbackCategories);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState(false);
@@ -59,6 +63,7 @@ export default function ProductsManager() {
     getAllProducts()
       .then(setItems)
       .finally(() => setLoading(false));
+    getAllCategories().then(setCatList).catch(() => {});
   }, []);
 
   const filtered = items.filter((p) =>
@@ -138,7 +143,7 @@ export default function ProductsManager() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const cat = categories.find((c) => c.name === draft.category);
+    const cat = catList.find((c) => c.name === draft.category);
     const product: Product = {
       id: draft.id ?? String(Date.now()),
       slug: slugify(draft.name),
@@ -451,7 +456,7 @@ export default function ProductsManager() {
                 onChange={(e) => setDraft({ ...draft, category: e.target.value })}
                 className={field}
               >
-                {categories.map((c) => (
+                {catList.map((c) => (
                   <option key={c.slug}>{c.name}</option>
                 ))}
               </select>

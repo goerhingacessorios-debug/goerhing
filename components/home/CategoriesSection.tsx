@@ -4,9 +4,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import * as Icons from "lucide-react";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { categories } from "@/lib/data";
+import type { Category } from "@/lib/types";
 
-export default function CategoriesSection() {
+export default function CategoriesSection({
+  categories,
+}: {
+  categories: Category[];
+}) {
   return (
     <section className="bg-white py-14 lg:py-20">
       <div className="container-px">

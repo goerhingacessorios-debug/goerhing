@@ -1,6 +1,6 @@
 import { supabase, supabaseConfigured } from "./supabase";
-import { products as mockProducts } from "./data";
-import type { Product } from "./types";
+import { products as mockProducts, categories as mockCategories } from "./data";
+import type { Product, Category } from "./types";
 
 /** Converte uma linha da tabela `products` do Supabase no tipo Product. */
 function rowToProduct(row: Record<string, unknown>): Product {
@@ -85,4 +85,38 @@ export async function getRelatedProducts(
     .filter((p) => p.categorySlug === product.categorySlug && p.id !== product.id)
     .concat(all.filter((p) => p.categorySlug !== product.categorySlug && p.id !== product.id))
     .slice(0, limit);
+}
+
+// ---------------- Categorias ----------------
+
+export function categoryToRow(c: Partial<Category> & { sort?: number }) {
+  return {
+    slug: c.slug,
+    name: c.name,
+    icon: c.icon ?? "Package",
+    description: c.description ?? "",
+    sort: c.sort ?? 0,
+  };
+}
+
+/** Categorias (Supabase quando configurado, senão as de exemplo). O `count`
+ *  é calculado a partir dos produtos cadastrados. */
+export async function getAllCategories(): Promise<Category[]> {
+  if (supabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from("categories")
+      .select("*")
+      .order("sort", { ascending: true });
+    if (!error && data && data.length) {
+      const products = await getAllProducts();
+      return data.map((row: Record<string, unknown>) => ({
+        slug: String(row.slug),
+        name: String(row.name),
+        icon: String(row.icon ?? "Package"),
+        description: String(row.description ?? ""),
+        count: products.filter((p) => p.categorySlug === row.slug).length,
+      }));
+    }
+  }
+  return mockCategories;
 }

@@ -1,11 +1,6 @@
 import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
-import {
-  FaWhatsapp,
-  FaInstagram,
-  FaFacebookF,
-  FaYoutube,
-} from "react-icons/fa";
+import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import Logo from "@/components/ui/Logo";
 import { SITE } from "@/lib/data";
 
@@ -15,7 +10,6 @@ const COLUMNS = [
     links: [
       { label: "Sobre Nós", href: "/sobre" },
       { label: "Blog", href: "/blog" },
-      { label: "Trabalhe Conosco", href: "/sobre#carreiras" },
     ],
   },
   {
@@ -42,8 +36,6 @@ export default function Footer() {
             {[
               { icon: FaWhatsapp, href: `https://wa.me/${SITE.whatsapp}` },
               { icon: FaInstagram, href: SITE.instagram },
-              { icon: FaFacebookF, href: SITE.facebook },
-              { icon: FaYoutube, href: SITE.youtube },
             ].map(({ icon: Icon, href }, i) => (
               <a
                 key={i}

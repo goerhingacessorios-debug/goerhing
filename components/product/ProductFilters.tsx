@@ -1,6 +1,6 @@
 "use client";
 
-import { categories } from "@/lib/data";
+import type { Category } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 
 export interface Filters {
@@ -14,10 +14,12 @@ export default function ProductFilters({
   filters,
   setFilters,
   priceMax,
+  categories,
 }: {
   filters: Filters;
   setFilters: (f: Filters) => void;
   priceMax: number;
+  categories: Category[];
 }) {
   return (
     <aside className="space-y-7">

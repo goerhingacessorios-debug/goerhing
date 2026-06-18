@@ -45,8 +45,12 @@ export default function ProductDetail({
 
           <div className="mt-3 flex items-center gap-3">
             <Rating value={product.rating} reviews={product.reviews} size={16} />
-            <span className="text-sm text-emerald-600">
-              {product.stock > 0 ? "Em estoque" : "Indisponível"}
+            <span
+              className={`text-sm font-semibold ${
+                product.stock > 0 ? "text-emerald-600" : "text-red-600"
+              }`}
+            >
+              {product.stock > 0 ? "Em estoque" : "ESGOTADO"}
             </span>
           </div>
 

@@ -19,8 +19,8 @@ const values = [
 ];
 
 const stats = [
-  { icon: Smile, end: 50000, suffix: "+", label: "Clientes satisfeitos" },
-  { icon: Package, end: 12000, suffix: "+", label: "Produtos vendidos" },
+  { icon: Smile, end: 500, suffix: "+", label: "Clientes satisfeitos" },
+  { icon: Package, end: 600, suffix: "+", label: "Produtos vendidos" },
   { icon: Award, end: 3, suffix: " anos", label: "De experiência" },
   { icon: Users, end: 98, suffix: "%", label: "Avaliações positivas" },
 ];
@@ -135,18 +135,6 @@ export default function SobrePage() {
             </div>
           ))}
         </div>
-      </section>
-
-      {/* Carreiras */}
-      <section id="carreiras" className="container-px py-16 text-center">
-        <h2 className="section-title">Trabalhe Conosco</h2>
-        <p className="mx-auto mt-3 max-w-xl text-neutral-600">
-          Quer fazer parte de um time apaixonado por tecnologia e inovação? Envie
-          seu currículo e venha crescer com a GOERHING.
-        </p>
-        <a href="mailto:rh@goerhing.com.br" className="btn-dark mt-6">
-          Enviar currículo
-        </a>
       </section>
     </div>
   );

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import ProductListing from "@/components/product/ProductListing";
-import { getAllProducts } from "@/lib/catalog";
+import { getAllProducts, getAllCategories } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Produtos",
@@ -12,7 +12,10 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function ProdutosPage() {
-  const products = await getAllProducts();
+  const [products, categories] = await Promise.all([
+    getAllProducts(),
+    getAllCategories(),
+  ]);
   return (
     <Suspense
       fallback={
@@ -21,7 +24,7 @@ export default async function ProdutosPage() {
         </div>
       }
     >
-      <ProductListing initialProducts={products} />
+      <ProductListing initialProducts={products} categories={categories} />
     </Suspense>
   );
 }

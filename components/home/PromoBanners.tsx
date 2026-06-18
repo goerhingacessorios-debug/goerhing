@@ -8,7 +8,7 @@ import { ArrowRight } from "lucide-react";
 const banners = [
   {
     title: "Qualidade que acompanha você",
-    subtitle: "Eletrônicos premium feitos para durar.",
+    subtitle: "Eletrônicos premium feitos para você.",
     image:
       "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?auto=format&fit=crop&w=1200&q=80",
     href: "/produtos",
